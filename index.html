@@ -11,61 +11,51 @@
   <!-- Learn about this code on MDN: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas -->
 
   <canvas id="canvas" width="300" height="227"></canvas>
+  <canvas id="zoom" width="300" height="227"></canvas>
   <div>
-    <input id="grayscalebtn" value="Grayscale" type="button">
-    <input id="invertbtn" value="Invert" type="button">
-
-    <input type="button"  value="reset" id="reset">
+  <label for="smoothbtn">
+    <input type="checkbox" name="smoothbtn" checked="checked" id="smoothbtn">
+    Enable image smoothing
+  </label>
   </div>
+
+
 <script >
   var img = new Image();
   img.src = 'https://mdn.mozillademos.org/files/5397/rhino.jpg';
-
   img.onload = function() {
     draw(this);
   };
-  
+
   function draw(img) {
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
-  
-    var imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
-    var data = imageData.data;
-  
-    var invert = function() {
-      for (var i = 0; i < data.length; i += 4) {
-        data[i]     = 255 - data[i];     // red
-        data[i + 1] = 255 - data[i + 1]; // green
-        data[i + 2] = 255 - data[i + 2]; // blue
-      }
-      ctx.putImageData(imageData, 0, 0);
-    };
-  
-    var grayscale = function() {
-      for (var i = 0; i < data.length; i += 4) {
-        var avg = (data[i] + data[i +1] + data[i +2]) / 3;
-        data[i]     = avg; // red
-        data[i + 1] = avg; // green
-        data[i + 2] = avg; // blue
-      }
-      ctx.putImageData(imageData, 0, 0);
-    };
-  var reset=function(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img, 0, 0);
-  
-    imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
-     data = imageData.data;
-  };
-    var invertbtn = document.getElementById('invertbtn');
-    invertbtn.addEventListener('click', invert);
-    var grayscalebtn = document.getElementById('grayscalebtn');
-    grayscalebtn.addEventListener('click', grayscale);
-    var resetbtn = document.getElementById('reset');
-    resetbtn.addEventListener("click",reset);
-  }
+    img.style.display = 'none';
+    var zoomctx = document.getElementById('zoom').getContext('2d');
 
+    var smoothbtn = document.getElementById('smoothbtn');
+    var toggleSmoothing = function(event) {
+      zoomctx.imageSmoothingEnabled = this.checked;
+      zoomctx.mozImageSmoothingEnabled = this.checked;
+      zoomctx.webkitImageSmoothingEnabled = this.checked;
+      zoomctx.msImageSmoothingEnabled = this.checked;
+    };
+    smoothbtn.addEventListener('change', toggleSmoothing);
+
+    var zoom = function(event) {
+      var x = event.layerX;
+      var y = event.layerY;
+      zoomctx.drawImage(canvas,
+                        Math.abs(x - 5),
+                        Math.abs(y - 5),
+                        10, 10,
+                        0, 0,
+                        200, 200);
+    };
+
+    canvas.addEventListener('mousemove', zoom);
+  }
 </script>
 </body>
 </html>
